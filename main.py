@@ -15,8 +15,14 @@ model = genai.GenerativeModel('gemini-3.5-flash')
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
+        self.send_header("Content-Length", "15")
         self.end_headers()
         self.wfile.write(b"Bot is running!")
+
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-Length", "15")
+        self.end_headers()
 
 def run_dummy_server():
     port = int(os.environ.get("PORT", 10000))
