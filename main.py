@@ -6,10 +6,10 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel('gemini-3.5-flash')
+if GROQ_API_KEY:
+    client = Groq(api_key=GROQ_API_KEY)
 
 # --- Dummy Web Server to pass Render Healthchecks ---
 class HealthCheckHandler(BaseHTTPRequestHandler):
@@ -38,14 +38,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
     try:
-        response = model.generate_content(user_text)
-        reply = response.text
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are Hermes, a helpful AI assistant. Always respond in Bengali or English based on the user's language. Keep answers concise but friendly."},
+                {"role": "user", "content": user_text}
+            ],
+            temperature=0.7,
+            max_tokens=1024,
+            top_p=1,
+            stream=False,
+            stop=None,
+        )
+        reply = completion.choices[0].message.content
     except Exception as e:
         reply = f"Sorry, I encountered an error: {e}"
     await update.message.reply_text(reply)
 
 def main():
-    if not TELEGRAM_TOKEN or not GEMINI_KEY:
+    if not TELEGRAM_TOKEN or not GROQ_API_KEY:
         print("Error: Missing API keys in environment variables!")
         return
         
