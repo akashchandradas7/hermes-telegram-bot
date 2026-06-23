@@ -1,7 +1,7 @@
 import os
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import google.generativeai as genai
+from groq import Groq
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -33,7 +33,7 @@ threading.Thread(target=run_dummy_server, daemon=True).start()
 # -----------------------------------------------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hello! I am your AI bot (Hermes), powered by Gemini Flash. How can I help you today?")
+    await update.message.reply_text("Hello! I am your AI bot (Hermes), powered by Groq (Llama 3.3). How can I help you today?")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
